@@ -3,6 +3,8 @@
 class ProductDetailManager {
   constructor() {
     this.product = null;
+    // Determine base URL depending on page location
+    this.BASE_URL = window.location.pathname.includes('product-detail.html') ? '../' : './';
     document.addEventListener("DOMContentLoaded", () => this.init());
   }
 
@@ -11,7 +13,7 @@ class ProductDetailManager {
     if (!id || !category) return this.showError("Product not found");
 
     try {
-      const response = await fetch("../products.json");
+      const response = await fetch(this.BASE_URL + "products.json");
       const data = await response.json();
       const list = data[category];
       if (!list) return this.showError("Category not found");
@@ -33,7 +35,7 @@ class ProductDetailManager {
     document.getElementById("productDetailContainer").innerHTML = `
       <div class="col-md-6 mb-4">
         <div class="product-image-container">
-          <img src="${p.img}" alt="${p.title}" class="product-image img-fluid" />
+          <img src="${this.BASE_URL}${p.img}" alt="${p.title}" class="product-image img-fluid" />
         </div>
       </div>
       <div class="col-md-6">
@@ -45,14 +47,13 @@ class ProductDetailManager {
         </div>
         <p class="fs-4 fw-semibold mb-3" style="color: black;">${p.price}</p>
 
-
         <div class="mb-3 text-muted"><i class="fas fa-shield-alt me-2"></i>2-Year Warranty</div>
 
-        <div class="d-flex align-items-center  mb-4">
+        <div class="d-flex align-items-center mb-4">
           <label class="me-3 fw-semibold">Quantity:</label>
           <div class="d-flex align-items-center border rounded px-2">
             <button class="quantity-btn" id="decreaseQty">−</button>
-            <input type="number" id="quantity" value="1" min="1" readonly class="mx-2 " style="width: 60px; color: black; text-align: center; background: #fff; border: 1px solid #ccc; border-radius: 8px;">
+            <input type="number" id="quantity" value="1" min="1" readonly class="mx-2" style="width: 60px; text-align: center; background: #fff; border: 1px solid #ccc; border-radius: 8px;">
             <button class="quantity-btn" id="increaseQty">+</button>
           </div>
         </div>
@@ -68,8 +69,6 @@ class ProductDetailManager {
           <li><i class="fas fa-check check me-2"></i>Baby-safe design</li>
         </ul>
       </div>
-
-      
 
       <div class="col-12 mt-5">
         <ul class="nav nav-tabs" id="productTabs">
@@ -113,51 +112,46 @@ class ProductDetailManager {
     input.value = val;
   }
 
-addToCart(event) {
+  addToCart(event) {
     if (!this.product) return;
     const qty = parseInt(document.getElementById("quantity").value);
     const item = { ...this.product, quantity: qty };
 
-    const productImg = document.querySelector(".product-image-container img"); // explicitly select image
+    const productImg = document.querySelector(".product-image-container img");
+    item.img = this.BASE_URL + this.product.img;
 
     if (window.cartManager) {
-        window.cartManager.addToCart(item, qty, event, productImg); // pass image element
+        window.cartManager.addToCart(item, qty, event, productImg);
     } else {
         this.addToLocalStorageDirectly(item);
         this.showToast(`${this.product.title} added to cart!`, "success");
     }
-}
-
-
-
-
-// ✅ Direct localStorage fallback method
-addToLocalStorageDirectly(item) {
-  try {
-    const cart = JSON.parse(localStorage.getItem('snuggleCart')) || [];
-    const existingItemIndex = cart.findIndex(cartItem => 
-      cartItem.id === item.id && cartItem.category === item.category
-    );
-
-    if (existingItemIndex > -1) {
-      cart[existingItemIndex].quantity += item.quantity;
-    } else {
-      cart.push(item);
-    }
-
-    localStorage.setItem('snuggleCart', JSON.stringify(cart));
-    
-    // Update cart count display
-    const totalCount = cart.reduce((sum, cartItem) => sum + cartItem.quantity, 0);
-    document.querySelectorAll('.cart-count').forEach(element => {
-      element.textContent = totalCount;
-    });
-    
-    console.log('✅ Item added to localStorage directly:', item);
-  } catch (error) {
-    console.error('❌ Error adding to localStorage:', error);
   }
-}
+
+  addToLocalStorageDirectly(item) {
+    try {
+      const cart = JSON.parse(localStorage.getItem('snuggleCart')) || [];
+      const existingItemIndex = cart.findIndex(cartItem =>
+        cartItem.id === item.id && cartItem.category === item.category
+      );
+
+      if (existingItemIndex > -1) {
+        cart[existingItemIndex].quantity += item.quantity;
+      } else {
+        cart.push(item);
+      }
+
+      localStorage.setItem('snuggleCart', JSON.stringify(cart));
+
+      // Update cart count display
+      const totalCount = cart.reduce((sum, cartItem) => sum + cartItem.quantity, 0);
+      document.querySelectorAll('.cart-count').forEach(element => element.textContent = totalCount);
+
+      console.log('✅ Item added to localStorage directly:', item);
+    } catch (error) {
+      console.error('❌ Error adding to localStorage:', error);
+    }
+  }
 
   setupTabs() {
     document.querySelectorAll("[data-tab]").forEach(btn => {
@@ -182,7 +176,6 @@ addToLocalStorageDirectly(item) {
     `;
   }
 
-  // ✅ Sky Blue Toast (same as cart.js)
   showToast(message, type = "success") {
     const toast = document.createElement("div");
     toast.className = `toast-notification toast-${type}`;
@@ -209,15 +202,10 @@ addToLocalStorageDirectly(item) {
 
     document.body.appendChild(toast);
 
-    setTimeout(() => {
-      toast.style.transform = "translateX(0)";
-    }, 100);
-
+    setTimeout(() => toast.style.transform = "translateX(0)", 100);
     setTimeout(() => {
       toast.style.transform = "translateX(400px)";
-      setTimeout(() => {
-        if (toast.parentNode) document.body.removeChild(toast);
-      }, 300);
+      setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 300);
     }, 3000);
   }
 }
