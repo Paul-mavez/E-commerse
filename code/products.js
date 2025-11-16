@@ -1,54 +1,46 @@
-const BASE_URL = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' 
-    ? './'
-    : '../';
 // products.js
 console.log("✅ products.js loaded");
 
+// Determine BASE_URL
+const BASE_URL = window.location.pathname.endsWith('index.html') || window.location.pathname === '/'
+    ? './'
+    : '../';
+
 // Fetch products.json dynamically
 fetch(`${BASE_URL}products.json`)
-fetch("./products.json")
   .then(res => res.json())
   .then(products => {
-    // ✅ Store globally for search.js
-    // Store globally
+    // Store globally for search.js
     window.data = products;
     window.breastPumpProducts = products.pump || [];
     window.breastfeedingProducts = products.feeding || [];
-@@ -19,35 +16,27 @@ fetch(`${BASE_URL}products.json`)
+    window.babyProducts = products.baby || [];
+    window.mamaProducts = products.mama || [];
+
+    // Get containers
+    const pumpsContainer = document.getElementById('pumpsContainer');
+    const feedingContainer = document.getElementById('feedingContainer');
     const babyContainer = document.getElementById('babyContainer');
     const mamaContainer = document.getElementById('mamaContainer');
 
-    // Helper function to create product cards
+    // Helper to create product cards
     function createProductCard(p, category) {
       const card = document.createElement('div');
-      card.className = 'col-6 col-md-3';
-
       card.className = 'col-6 col-md-3 product-card';
       card.dataset.id = p.id;
       card.dataset.category = category;
       card.innerHTML = `
-        <div class="card product-card" data-id="${p.id}" data-category="${category}">
-          <div class="product-image">
-            <a href="${BASE_URL}Pages/product-detail.html?id=${p.id}&category=${category}" style="display:block;">
-              <img src="${BASE_URL}${p.img}" alt="${p.title}">
-            </a>
-            <button class="add-to-cart">
-              <i class="fas fa-cart-plus"></i> Add to Cart
-            </button>
-          </div>
-          <a href="${BASE_URL}Pages/product-detail.html?id=${p.id}&category=${category}" class="product-title">
-            ${p.title}
         <div class="product-image">
-          <a href="./Pages/product-detail.html?id=${p.id}&category=${category}" style="display:block">
-            <img src="./${p.img}" alt="${p.title}" />
+          <a href="${BASE_URL}Pages/product-detail.html?id=${p.id}&category=${category}" style="display:block;">
+            <img src="${BASE_URL}${p.img}" alt="${p.title}">
           </a>
-          <p class="product-price">${p.price}</p>
-          <button class="add-to-cart"><i class="fas fa-cart-plus"></i> Add to Cart</button>
+          <button class="add-to-cart">
+            <i class="fas fa-cart-plus"></i> Add to Cart
+          </button>
         </div>
-        <a href="./Pages/product-detail.html?id=${p.id}&category=${category}" class="product-title">${p.title}</a>
+        <a href="${BASE_URL}Pages/product-detail.html?id=${p.id}&category=${category}" class="product-title">${p.title}</a>
         <p class="product-price">${p.price}</p>
       `;
-
       return card;
     }
 
@@ -58,5 +50,4 @@ fetch("./products.json")
     if (babyContainer) window.babyProducts.forEach(p => babyContainer.appendChild(createProductCard(p, 'baby')));
     if (mamaContainer) window.mamaProducts.forEach(p => mamaContainer.appendChild(createProductCard(p, 'mama')));
   })
-  .catch(err => console.error('Error loading products:', err));
   .catch(err => console.error('❌ Error loading products:', err));
