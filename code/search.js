@@ -1,4 +1,3 @@
-// search.js
 class SearchManager {
   constructor() {
     this.searchInput = document.getElementById('searchInput');
@@ -10,8 +9,8 @@ class SearchManager {
 
     this.allProducts = [];
 
-    // Dynamically set base URL
-    this.BASE_URL = window.location.pathname.includes('index.html') || window.location.pathname === '/' 
+    // Dynamically set base URL for links and images
+    this.BASE_URL = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' 
       ? './'
       : '../';
 
@@ -118,7 +117,7 @@ class SearchManager {
   hideSearchResults() { this.searchResultsSidebar.classList.remove('active'); this.searchOverlay.classList.remove('active'); }
 }
 
-// Initialize
+// Initialize after DOM load
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => new SearchManager(), 100);
 });
