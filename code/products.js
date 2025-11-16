@@ -1,10 +1,9 @@
-// products.js
-console.log("✅ products.js loaded");
-
-// Determine BASE_URL
-const BASE_URL = window.location.pathname.endsWith('index.html') || window.location.pathname === '/'
+// products.js - Restored layout version
+const BASE_URL = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' 
     ? './'
     : '../';
+
+console.log("✅ products.js loaded");
 
 // Fetch products.json dynamically
 fetch(`${BASE_URL}products.json`)
@@ -17,30 +16,34 @@ fetch(`${BASE_URL}products.json`)
     window.babyProducts = products.baby || [];
     window.mamaProducts = products.mama || [];
 
-    // Get containers
+    // Containers
     const pumpsContainer = document.getElementById('pumpsContainer');
     const feedingContainer = document.getElementById('feedingContainer');
     const babyContainer = document.getElementById('babyContainer');
     const mamaContainer = document.getElementById('mamaContainer');
 
-    // Helper to create product cards
+    // Helper function to create product cards
     function createProductCard(p, category) {
       const card = document.createElement('div');
-      card.className = 'col-6 col-md-3 product-card';
-      card.dataset.id = p.id;
-      card.dataset.category = category;
+      card.className = 'col-6 col-md-3'; // Bootstrap column
+
       card.innerHTML = `
-        <div class="product-image">
-          <a href="${BASE_URL}Pages/product-detail.html?id=${p.id}&category=${category}" style="display:block;">
-            <img src="${BASE_URL}${p.img}" alt="${p.title}">
+        <div class="card product-card" data-id="${p.id}" data-category="${category}">
+          <div class="product-image">
+            <a href="${BASE_URL}Pages/product-detail.html?id=${p.id}&category=${category}">
+              <img src="${BASE_URL}${p.img}" alt="${p.title}">
+            </a>
+            <button class="add-to-cart">
+              <i class="fas fa-cart-plus"></i> Add to Cart
+            </button>
+          </div>
+          <a href="${BASE_URL}Pages/product-detail.html?id=${p.id}&category=${category}" class="product-title">
+            ${p.title}
           </a>
-          <button class="add-to-cart">
-            <i class="fas fa-cart-plus"></i> Add to Cart
-          </button>
+          <p class="product-price">${p.price}</p>
         </div>
-        <a href="${BASE_URL}Pages/product-detail.html?id=${p.id}&category=${category}" class="product-title">${p.title}</a>
-        <p class="product-price">${p.price}</p>
       `;
+
       return card;
     }
 
@@ -51,3 +54,4 @@ fetch(`${BASE_URL}products.json`)
     if (mamaContainer) window.mamaProducts.forEach(p => mamaContainer.appendChild(createProductCard(p, 'mama')));
   })
   .catch(err => console.error('❌ Error loading products:', err));
+
