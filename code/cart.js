@@ -2,6 +2,9 @@ console.log("✅ cart.js loaded successfully!");
 
 class CartManager {
     constructor() {
+        this.BASE_URL = window.location.pathname.includes('index.html') || window.location.pathname === '/' 
+            ? './'
+            : '../';
         this.cart = this.getCartFromStorage();
         this.init();
     }
@@ -20,21 +23,21 @@ class CartManager {
         localStorage.setItem('snuggleCart', JSON.stringify(this.cart));
     }
 
-   addToCart(product, quantity = 1, event = null, productImg = null) {
-    const existingItem = this.cart.find(item => item.id === product.id && item.category === product.category);
+    addToCart(product, quantity = 1, event = null, productImg = null) {
+        const existingItem = this.cart.find(item => item.id === product.id && item.category === product.category);
 
-    if (existingItem) existingItem.quantity += quantity;
-    else this.cart.push({ ...product, quantity });
+        if (existingItem) existingItem.quantity += quantity;
+        else this.cart.push({ ...product, quantity });
 
-    this.saveCartToStorage();
-    this.updateCartCount();
+        this.saveCartToStorage();
+        this.updateCartCount();
 
-    // Flying animation
-    if (event) this.showAddToCartAnimation(event, product.img, productImg);
+        // Flying animation
+        if (event) this.showAddToCartAnimation(event, product.img, productImg);
 
-    // Toast
-    this.showToast(`${product.title} added to cart!`, 'success');
-}
+        // Toast
+        this.showToast(`${product.title} added to cart!`, 'success');
+    }
 
     removeFromCart(productId, category) {
         this.cart = this.cart.filter(item => !(item.id === productId && item.category === category));
@@ -70,60 +73,57 @@ class CartManager {
     }
 
     // ✅ Universal Flying Image Animation
-showAddToCartAnimation(event, imgSrc, productImgElement = null) {
-    const productImg = productImgElement || event.target.closest('.product-card')?.querySelector('img');
-    const cartBtn = document.getElementById('cartBtn');
-    if (!productImg || !cartBtn) return;
+    showAddToCartAnimation(event, imgSrc, productImgElement = null) {
+        const productImg = productImgElement || event.target.closest('.product-card')?.querySelector('img');
+        const cartBtn = document.getElementById('cartBtn');
+        if (!productImg || !cartBtn) return;
 
-    const flyingImage = document.createElement('div');
-    flyingImage.className = 'flying-image';
-    flyingImage.innerHTML = `<img src="${imgSrc}" alt="Flying Image">`;
+        const flyingImage = document.createElement('div');
+        flyingImage.className = 'flying-image';
+        flyingImage.innerHTML = `<img src="${imgSrc}" alt="Flying Image">`;
 
-    const productRect = productImg.getBoundingClientRect();
-    const cartRect = cartBtn.getBoundingClientRect();
+        const productRect = productImg.getBoundingClientRect();
+        const cartRect = cartBtn.getBoundingClientRect();
 
-    flyingImage.style.cssText = `
-        position: fixed;
-        left: ${productRect.left}px;
-        top: ${productRect.top}px;
-        width: ${productRect.width}px;
-        height: ${productRect.height}px;
-        z-index: 10000;
-        pointer-events: none;
-        transition: all 0.8s cubic-bezier(0.215, 0.610, 0.355, 1);
-        border-radius: 50%; /* changed from 8px to 50% for circle */
-        overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        
-    `;
-    flyingImage.querySelector('img').style.cssText = `
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 50%; /* ensures the image itself is circular */
-    `;
+        flyingImage.style.cssText = `
+            position: fixed;
+            left: ${productRect.left}px;
+            top: ${productRect.top}px;
+            width: ${productRect.width}px;
+            height: ${productRect.height}px;
+            z-index: 10000;
+            pointer-events: none;
+            transition: all 0.8s cubic-bezier(0.215, 0.610, 0.355, 1);
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        `;
+        flyingImage.querySelector('img').style.cssText = `
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        `;
 
-    document.body.appendChild(flyingImage);
+        document.body.appendChild(flyingImage);
 
-    setTimeout(() => {
-        flyingImage.style.left = `${cartRect.left + cartRect.width / 2 - productRect.width / 4}px`;
-        flyingImage.style.top = `${cartRect.top + cartRect.height / 2 - productRect.height / 4}px`;
-        flyingImage.style.width = `${productRect.width / 2}px`;
-        flyingImage.style.height = `${productRect.height / 2}px`;
-        flyingImage.style.opacity = '0.6';
-        flyingImage.style.transform = 'rotate(20deg) scale(0.5)';
-    }, 50);
+        setTimeout(() => {
+            flyingImage.style.left = `${cartRect.left + cartRect.width / 2 - productRect.width / 4}px`;
+            flyingImage.style.top = `${cartRect.top + cartRect.height / 2 - productRect.height / 4}px`;
+            flyingImage.style.width = `${productRect.width / 2}px`;
+            flyingImage.style.height = `${productRect.height / 2}px`;
+            flyingImage.style.opacity = '0.6';
+            flyingImage.style.transform = 'rotate(20deg) scale(0.5)';
+        }, 50);
 
-    setTimeout(() => {
-        document.body.removeChild(flyingImage);
-        cartBtn.classList.add('cart-bounce');
-        setTimeout(() => cartBtn.classList.remove('cart-bounce'), 300);
-    }, 850);
-}
+        setTimeout(() => {
+            document.body.removeChild(flyingImage);
+            cartBtn.classList.add('cart-bounce');
+            setTimeout(() => cartBtn.classList.remove('cart-bounce'), 300);
+        }, 850);
+    }
 
-
-
-        // Toast Notification
+    // Toast Notification
     showToast(message, type = 'info') {
         const toast = document.createElement('div');
         toast.className = `toast-notification toast-${type}`;
@@ -164,7 +164,7 @@ showAddToCartAnimation(event, imgSrc, productImgElement = null) {
                     id: parseInt(productCard.dataset.id),
                     title: productCard.querySelector('.product-title').textContent,
                     price: productCard.querySelector('.product-price').textContent,
-                    img: productCard.querySelector('img').src,
+                    img: this.BASE_URL + productCard.querySelector('img').getAttribute('src'),
                     category: productCard.dataset.category
                 };
                 this.addToCart(product, 1, e);
@@ -180,3 +180,4 @@ showAddToCartAnimation(event, imgSrc, productImgElement = null) {
 }
 
 window.cartManager = new CartManager();
+
